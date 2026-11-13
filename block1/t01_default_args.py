@@ -10,6 +10,9 @@
 """
 
 
-def build_tags(source, tags=[]):
+def build_tags(source, tags=None):
+    if tags is None:
+        tags = []
     tags.append(f"source:{source}")
     return tags
+

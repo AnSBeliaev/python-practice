@@ -1,3 +1,4 @@
+import copy
 """
 Задача 1.2. Настройки по умолчанию
 
@@ -18,7 +19,7 @@ DEFAULT_CONFIG = {
 
 
 def build_config(overrides):
-    config = DEFAULT_CONFIG.copy()
+    config = copy.deepcopy(DEFAULT_CONFIG)
     for section, values in overrides.items():
         if isinstance(values, dict):
             config[section].update(values)

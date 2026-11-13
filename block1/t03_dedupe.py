@@ -14,4 +14,5 @@
 
 
 def unique_emails(users):
-    raise NotImplementedError
+    unique = {user["email"].strip().lower(): None for user in users if user["email"] and user["email"].strip()}
+    return list(unique)
