@@ -1,3 +1,4 @@
+from urllib.parse import urlencode
 """
 Задача 1.6. Адрес запроса к внешнему API
 
@@ -19,4 +20,13 @@ build_url("https://api.shop.ru", "/orders", status="paid", page=2, city=None).
 
 
 def build_url(base, path, **params):
-    raise NotImplementedError
+    filtered_params = {param_key: param_value for param_key, param_value in params.items() if param_value is not None}
+
+    for param_key, param_value in filtered_params.items():
+        if isinstance(param_value, bool):
+            if param_value: filtered_params[param_key] = "true"
+            else: filtered_params[param_key] = "false"
+
+    url = f"{base.rstrip("/")}/{path.lstrip("/")}"
+    query = urlencode(filtered_params, doseq=True)
+    return f"{url}?{query}" if query else url
