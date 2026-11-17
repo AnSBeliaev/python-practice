@@ -18,14 +18,37 @@
 обработать файл, который не помещается в память?"
 """
 
-
 def read_rows(path):
-    raise NotImplementedError
-
+    with open(path, encoding="utf-8-sig") as f:
+        keys = []
+        for line in f:
+            clean_line = line.strip()
+            if not clean_line: continue
+            keys = [key.strip() for key in clean_line.split(";")]
+            break
+        for line in f:
+            clean_line = line.strip()
+            if not clean_line: continue
+            values = [value.strip() for value in clean_line.split(";")]
+            row = dict(zip(keys, values))
+            yield row
 
 def batched(iterable, size):
-    raise NotImplementedError
-
+    lists = []
+    for item in iterable:
+        lists.append(item) 
+        if len(lists) == size:
+            yield lists
+            lists = []
+    if lists:
+        yield lists
+        lists = []
 
 def import_file(path, save_batch, size=1000):
-    raise NotImplementedError
+    rows = read_rows(path)
+    batched_rows = batched(rows, size)
+    count = 0
+    for row in batched_rows:
+        save_batch(row)
+        count += len(row)
+    return count

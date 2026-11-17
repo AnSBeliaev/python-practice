@@ -8,11 +8,25 @@
 
 Нужен Python 3.11 или новее.
 
+Linux и macOS:
+
 ```
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
 
+Windows, PowerShell, из папки проекта:
+
+```
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+После активации в начале строки терминала появляется `(.venv)`.
+
+```
 pytest                      все тесты
 pytest block1               один блок
 pytest -k test_03           одна задача

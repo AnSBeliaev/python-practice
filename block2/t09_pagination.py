@@ -15,4 +15,11 @@
 
 
 def iter_items(fetch_page):
-    raise NotImplementedError
+    items_list = fetch_page(None)
+    while True:
+        for item in items_list["items"]:
+            yield item
+        if items_list["next"] is None:
+            break
+        items_list = fetch_page(items_list["next"])
+
