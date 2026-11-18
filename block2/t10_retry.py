@@ -21,7 +21,19 @@
 """
 
 import time
-
+from functools import wraps
 
 def retry(times=3, exceptions=(Exception,), delay=0.0, backoff=2.0, sleep=time.sleep):
-    raise NotImplementedError
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions:
+                    if attempt == times - 1:
+                        raise
+                    else:
+                        sleep(delay * (backoff ** attempt))
+        return wrapper
+    return decorator
