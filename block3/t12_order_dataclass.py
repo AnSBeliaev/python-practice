@@ -20,3 +20,43 @@
 На собесе: "Зачем dataclass? Что делает field(default_factory=list) и почему
 нельзя написать items: list = []? Чем classmethod отличается от staticmethod?"
 """
+from dataclasses import dataclass, field
+from decimal import Decimal
+
+@dataclass(order=True)
+class OrderItem:
+    sku: str = field(compare=False)
+    price: Decimal
+    qty: int
+
+    def __post_init__(self):
+      if self.price < 0:
+         raise ValueError("Цена не может быть отрицательной")
+      if self.qty <= 0:
+         raise ValueError("Количество должно быть больше нуля")
+
+@dataclass
+class Order:
+    id: int
+    items: list[OrderItem] = field(default_factory=list)
+    
+    @property
+    def total(self) -> Decimal:
+      return sum((item.price * item.qty for item in self.items), Decimal("0"))
+
+    def add_item(self, item):
+      self.items.append(item)
+
+    @classmethod
+    def from_dict(cls, data):
+      id = data["id"]
+      order_items = [OrderItem(sku=order_item["sku"], price=Decimal(order_item["price"]), qty=order_item["qty"]) for order_item in data.get("items", [])]
+      return cls(id=id, items=order_items)
+
+    def to_dict(self):
+      items = [{"sku": item.sku, "price": str(item.price), "qty": item.qty} for item in self.items]
+      id = self.id
+      return {
+         "id": id,
+         "items": items
+      }
