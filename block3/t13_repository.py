@@ -24,3 +24,82 @@
 На собесе: "Что такое абстрактный класс? Зачем __len__, __contains__,
 __iter__? Что такое внедрение зависимостей и как оно помогает тестам?"
 """
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+class UserRepository(ABC):
+    @abstractmethod
+    def get(self, user_id: int):
+        pass
+    
+    @abstractmethod
+    def get_by_email(self, email: str):
+        pass
+
+    @abstractmethod
+    def add(self, user: User):
+        pass
+
+    @abstractmethod
+    def list_active(self):
+        pass
+
+class InMemoryUserRepository(UserRepository):
+    def __init__(self):
+      self.users: dict = {}
+
+    def __len__(self):
+      return len(self.users)
+   
+    def __contains__(self, user_id: int):
+       return user_id in self.users
+   
+    def __iter__(self):
+       for user in self.users.values():
+          yield user
+
+    def get(self, user_id: int):
+      if self.__contains__(user_id):
+         return self.users.get(user_id)
+      else: return None
+
+    def get_by_email(self, email: str):
+        for user in self.users.values():
+            if user.email == email:
+               return user
+
+    def add(self, user: User) -> None:
+        self.users[user.id] = user
+
+    def list_active(self) -> list[User]:
+      return [user for user in self.users.values() if user.is_active]
+
+@dataclass
+class User:
+    id: int
+    email: str
+    is_active: bool = True
+
+class UserService:
+    def __init__(self, repo: UserRepository):
+      self._repo = repo
+      self._next_id = 1
+  
+    def register(self, email):
+        normalized_email = email.lower()
+        if self._repo.get_by_email(normalized_email) is not None:
+            raise ValueError(f"Email {normalized_email} уже занят")
+
+        user = User(id=self._next_id, email=normalized_email)
+        self._repo.add(user)
+        self._next_id += 1
+        return user
+    
+    def deactivate(self, user_id):
+        user = self._repo.get(user_id)
+        if user is None:
+            raise KeyError("Юзера не существует")
+        user.is_active = False
+        return user
+    
